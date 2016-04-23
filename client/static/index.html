@@ -17,6 +17,12 @@
           .when('/main',{
               templateUrl: 'partials/main.html'
           })
+          .when('/survey',{
+              templateUrl: 'partials/survey.html'
+          })
+          .when('/create',{
+              templateUrl: 'partials/create.html'
+          })
           .otherwise({
             redirectTo: '/'
           });
@@ -24,13 +30,15 @@
 
       myApp.factory('userFactory', function ($http){
         // The factory is nothing more than a function that returns an object
-        var user = [];
+        var user = {};
         var factory = {};
 
         factory.checkUser = function (newUser, callback){
           var url = '/users/' + newUser.name + '/';
+          console.log('gonna check this user: ' + url);
           $http.get(url).success(function(output){
-            loggeduser = output;
+            user = output;
+            console.log('added bstrd');
             callback(output);
           })
         }
@@ -50,14 +58,68 @@
           })
         }
 
-        factory.getUser = function(callback){
-          callback(user);
+        factory.getUser = function(user, callback){
+          console.log('getting this user');
+          console.log(user);
+          $http.post('/users/find', {user: user}).success(function(output){
+            callback(output);
+          })
         }
 
         factory.logout = function(callback){
-          user = [];
+          user = {};
           callback(true);
         }
+        // Most important step: return the object so it can be used by the rest of our angular code
+        return factory;
+      });
+
+      myApp.factory('surveyFactory', function ($http){
+        // The factory is nothing more than a function that returns an object
+        var factory = {};
+        var surveys = [];
+
+        factory.getSurveys = function (callback){
+          console.log('gonna get the surveys');
+          $http.get('/surveys').success(function(output){
+            surveys = output;
+            console.log('loading up all surveys:');
+            console.log(surveys);
+            callback(surveys);
+          })
+        }
+
+        factory.findSurvey = function (survey, callback){
+          console.log('gonna find this survey:');
+          console.log(survey);
+          $http.post('/surveys/find', {survey: survey}).success(function(output){
+            callback(output);
+          })
+        }
+
+        factory.addSurvey = function(newSurvey, callback){
+          console.log('factory sending new survey to server...')
+          $http.post('/surveys/new', newSurvey).success(function(output){
+            console.log('factory received new survey from server');
+            surveys.push(output);
+            callback(surveys);
+          })
+        }
+
+        factory.delete = function(survey, callback){
+          $http.post('/surveys/delete', survey).success(function(){
+            console.log('got here');
+            surveys.splice(surveys.indexOf(survey), 1);
+            callback(surveys);
+          })
+        }
+
+        factory.vote = function(infos, callback){
+          $http.post('/surveys/vote', infos).success(function(){
+            callback('success');
+          })
+        }
+
         // Most important step: return the object so it can be used by the rest of our angular code
         return factory;
       });
@@ -67,12 +129,124 @@
 
         $scope.login = function(){
           userFactory.checkUser($scope.newUser, function(data){
-            $location.path('/main').search({user: data[0].name});
+            console.log('this the user data');
+            console.log(data);
+            $location.path('/main').search({user: data.name});
           })
 
           //$location.path('/main').search({name: $scope.user.name});
         }
       });
+
+      myApp.controller('surveyController', function ($scope, userFactory, surveyFactory, $location, $routeParams){
+        $scope.surveys = [];
+        $scope.user = $routeParams.user;
+        $scope.userobj = {};
+
+        surveyFactory.getSurveys(function(data){
+          $scope.surveys = data;
+        })
+
+        userFactory.getUser($scope.user, function(data){
+          $scope.userobj = data[0];
+          console.log('user obj:');
+          console.log($scope.userobj);
+        })
+
+        $scope.open = function(id){
+          console.log('trying to go to survey page');
+          var data = {survey: id, user: $scope.user}
+          $location.path('/survey').search(data);
+        }
+
+        $scope.addNew = function(){
+          $location.path('/create').search({user: $scope.user})
+        }
+
+        $scope.logout = function(){
+          $location.path('/').search({});
+        }
+
+        $scope.delete = function(survey){
+          surveyFactory.delete(survey, function(data){
+            console.log('new data:');
+            console.log(data);
+            $scope.surveys = data;
+          })
+        }
+
+      });
+
+      myApp.controller('surveyCreateController', function ($scope, userFactory, surveyFactory, $location, $routeParams){
+        $scope.user = $routeParams.user;
+        $scope.userobj = {};
+
+        userFactory.getUser($scope.user, function(data){
+          $scope.userobj = data[0];
+          console.log($scope.userobj);
+        })
+
+        $scope.addSurvey = function(){
+          console.log('creating survey...');
+          if($scope.newSurvey != null && ($scope.newSurvey.question != null || $scope.newSurvey.option1 != null || $scope.newSurvey.option2 != null || $scope.newSurvey.option3 != null || $scope.newSurvey.option4 != null) ){
+            $scope.newSurvey.user = $scope.userobj;
+            $scope.newSurvey.options = [];
+            $scope.newSurvey.options.push($scope.newSurvey.option1);
+            $scope.newSurvey.options.push($scope.newSurvey.option2);
+            $scope.newSurvey.options.push($scope.newSurvey.option3);
+            $scope.newSurvey.options.push($scope.newSurvey.option4);
+            console.log('this is the new survey sent:');
+            console.log($scope.newSurvey);
+            surveyFactory.addSurvey($scope.newSurvey, function(data){
+              console.log('SAVED!');
+              console.log('new survey: ' + data[0]);
+              $location.path('/main').search({user: $scope.user});
+            })
+          } else {
+            alert('Fill out Survey Appropriately!');
+          }
+
+        }
+
+        $scope.toMain = function(){
+          $location.path('/main').search({user: $scope.user})
+        }
+      });
+
+      myApp.controller('surveyPageController', function ($scope, userFactory, surveyFactory, $location, $routeParams){
+        $scope.user = $routeParams.user;
+        $scope.userobj = {};
+        $scope.survey = $routeParams.survey;
+        $scope.surveyobj = {};
+
+        surveyFactory.getSurveys(function(data){
+          console.log('surveys loaded on factory');
+          console.log(data);
+        })
+
+        userFactory.getUser($scope.user, function(data){
+          $scope.userobj = data[0];
+          console.log($scope.userobj);
+        })
+
+        surveyFactory.findSurvey($scope.survey, function(data){
+          $scope.surveyobj = data[0];
+          console.log($scope.surveyobj);
+        })
+
+        $scope.toMain = function(){
+          $location.path('/main').search({user: $scope.user})
+        }
+
+        $scope.vote = function(index){
+          var infos = {survey: $scope.surveyobj, index: index};
+          surveyFactory.vote(infos, function(data){
+            console.log('successfully updated vote!');
+            $scope.surveyobj.answers[index].votes += 1;
+          })
+        }
+      });
+
     </script>
     <style media="screen">
       .container{
@@ -82,7 +256,6 @@
     </style>
   </head>
   <body>
-    Blackbelt
     <div ng-view="">
     </div>
   </body>

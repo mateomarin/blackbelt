@@ -1,0 +1,15 @@
+<div ng-controller='userController' class="container">
+  <form class="form-inline">
+    <div class="form-group">
+      <div class="col-sm-4">
+        <input type="text" class="form-control" id="name" ng-model="newUser.name" placeholder="Your name...">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-success" ng-click="login()">Enter</button>
+      </div>
+    </div>
+  </form>
+</div>

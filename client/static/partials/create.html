@@ -1,0 +1,45 @@
+<div ng-controller='surveyCreateController' class="container">
+  <div class="header">
+    <a href="" ng-click="toMain()">Cancel</a>
+  </div>
+  <h4>Put the question and options here:</h4>
+  <form class="form-inline">
+    <div class="form-group col-sm-12">
+      <div class="col-sm-12">
+        <label for="question" class="col-sm-4 control-label">Question:</label>
+        <input type="text" class="form-control col-sm-8" id="question" ng-model="newSurvey.question">
+      </div>
+    </div>
+
+    <div class="form-group col-sm-12">
+      <div class="col-sm-12">
+        <label for="option1" class="col-sm-4 control-label">Option 1:</label>
+        <input type="text" class="form-control col-sm-8" id="option1" ng-model="newSurvey.option1">
+      </div>
+    </div>
+    <div class="form-group col-sm-12">
+      <div class="col-sm-12">
+        <label for="option2" class="col-sm-4 control-label">Option 2:</label>
+        <input type="text" class="form-control col-sm-8" id="option2" ng-model="newSurvey.option2">
+      </div>
+    </div>
+    <div class="form-group col-sm-12">
+      <div class="col-sm-12">
+        <label for="option3" class="col-sm-4 control-label">Option 3:</label>
+        <input type="text" class="form-control col-sm-8" id="option3" ng-model="newSurvey.option3">
+      </div>
+    </div>
+    <div class="form-group col-sm-12">
+      <div class="col-sm-12">
+        <label for="option4" class="col-sm-4 control-label">Option 4:</label>
+        <input type="text" class="form-control col-sm-8" id="option4" ng-model="newSurvey.option4">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-12">
+        <button type="submit" class="btn btn-success" ng-click="addSurvey()">Create Poll</button>
+      </div>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,20 @@
+<div ng-controller="surveyPageController" class="container">
+  <div class="header">
+    <a href="" ng-click="toMain()">Go to Polls</a>
+  </div>
+  <div class="table">
+    <input class="filter" type="text" ng-model="filter_name" placeholder="Search">
+    <table class="table table-striped">
+      <tbody>
+        <th>Option</th>
+        <th>Current Count of Votes</th>
+        <th>Action</th>
+        <tr ng-repeat="answer in surveyobj.answers">
+          <td>{{answer.answer}}</td>
+          <td>{{answer.votes}}</td>
+          <td><button ng-click="vote(answer.index)">Vote</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
