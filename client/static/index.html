@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html ng-app='myApp'>
+  <head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <script src='https://ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js'/></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <script type="text/javascript">
+      var myApp = angular.module('myApp', ['ngRoute']);
+
+      myApp.config(function ($routeProvider, $locationProvider) {
+        $routeProvider
+          .when('/',{
+              templateUrl: 'partials/login.html'
+          })
+          .when('/main',{
+              templateUrl: 'partials/main.html'
+          })
+          .otherwise({
+            redirectTo: '/'
+          });
+      });
+
+      myApp.factory('userFactory', function ($http){
+        // The factory is nothing more than a function that returns an object
+        var user = [];
+        var factory = {};
+
+        factory.checkUser = function (newUser, callback){
+          var url = '/users/' + newUser.name + '/';
+          $http.get(url).success(function(output){
+            loggeduser = output;
+            callback(output);
+          })
+        }
+
+        factory.findUser = function (newUser, callback){
+          var url = '/users/' + newUser + '/';
+          $http.get(url).success(function(output){
+            loggeduser = output;
+            callback(output);
+          })
+        }
+
+        factory.addUser = function(newUser, callback){
+          $http.post('/users/new', newUser).success(function(output){
+            user.push(output);
+            callback(user);
+          })
+        }
+
+        factory.getUser = function(callback){
+          callback(user);
+        }
+
+        factory.logout = function(callback){
+          user = [];
+          callback(true);
+        }
+        // Most important step: return the object so it can be used by the rest of our angular code
+        return factory;
+      });
+
+      myApp.controller('userController', function ($scope, $location, $routeParams, userFactory){
+        $scope.user = [];
+
+        $scope.login = function(){
+          userFactory.checkUser($scope.newUser, function(data){
+            $location.path('/main').search({user: data[0].name});
+          })
+
+          //$location.path('/main').search({name: $scope.user.name});
+        }
+      });
+    </script>
+    <style media="screen">
+      .container{
+        width: 980px;
+        border: 2px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    Blackbelt
+    <div ng-view="">
+    </div>
+  </body>
+</html>

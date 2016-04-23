@@ -1,0 +1,9 @@
+{
+  "name": "blackbelt",
+  "dependencies": {
+    "body-parser": "^1.10.1",
+    "express": "^4.10.0",
+    "ejs": "1.0.0",
+    "mongoose": "^4.0.1"
+  }
+}
